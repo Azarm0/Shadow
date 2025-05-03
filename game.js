@@ -55,6 +55,21 @@ const gameState = {
         xpToNextLevel: 100,
         health: 100,
         maxHealth: 100,
+    },
+    dailyChallenge: {
+        type: null,
+        progress: 0,
+        target: 0,
+        reward: null,
+        lastReset: 0
+    },
+    bossRush: {
+        enabled: false,
+        currentBossIndex: 0,
+        defeatedBosses: [],
+        timeLimit: 600000, // 10 minutes
+        startTime: 0
+    },
         attack: 10,
         defense: 5,
         speed: 3,
@@ -835,6 +850,29 @@ function spawnParticles(targetElem, color = '#fff', count = 18, type = 'burst') 
 }
 
 // --- Shop Logic --- (Revised)
+// Enchantment system
+const ENCHANTMENTS = {
+    SHARP: { name: 'Sharp', attackBonus: 5 },
+    STURDY: { name: 'Sturdy', defenseBonus: 5 },
+    SWIFT: { name: 'Swift', speedBonus: 2 },
+    VITAL: { name: 'Vital', healthBonus: 20 },
+    ELEMENTAL: { name: 'Elemental', elementalBonus: 0.2 }
+};
+
+function enchantItem(item, enchantment) {
+    if (!item.enchantments) item.enchantments = [];
+    item.enchantments.push(enchantment);
+    
+    // Apply enchantment bonuses to item effects
+    if (!item.effect) item.effect = {};
+    if (enchantment.attackBonus) item.effect.attack = (item.effect.attack || 0) + enchantment.attackBonus;
+    if (enchantment.defenseBonus) item.effect.defense = (item.effect.defense || 0) + enchantment.defenseBonus;
+    if (enchantment.speedBonus) item.effect.speed = (item.effect.speed || 0) + enchantment.speedBonus;
+    if (enchantment.healthBonus) item.effect.maxHealth = (item.effect.maxHealth || 0) + enchantment.healthBonus;
+    
+    return item;
+}
+
 function purchaseItem(item, category) {
     // Basic implementation: deduct gems, add item/skill, apply effects
     if (!item || typeof item.price !== 'number') {
@@ -1182,10 +1220,54 @@ function showMoveIndicator(targetElem, moveName, color) {
 
 
 // --- Damage Formula Rework --- (Revised)
+// Combat combo tracking
+let comboCount = 0;
+let lastAttackTime = 0;
+const COMBO_WINDOW = 2000; // 2 seconds to maintain combo
+
+// Elemental system
+const ELEMENTS = {
+    NEUTRAL: 'neutral',
+    FIRE: 'fire',
+    ICE: 'ice',
+    LIGHTNING: 'lightning',
+    SHADOW: 'shadow',
+    LIGHT: 'light'
+};
+
+const ELEMENT_ADVANTAGES = {
+    [ELEMENTS.FIRE]: ELEMENTS.ICE,
+    [ELEMENTS.ICE]: ELEMENTS.LIGHTNING,
+    [ELEMENTS.LIGHTNING]: ELEMENTS.SHADOW,
+    [ELEMENTS.SHADOW]: ELEMENTS.LIGHT,
+    [ELEMENTS.LIGHT]: ELEMENTS.FIRE
+};
+
 function calculateDamage(attacker, defender, movePower = 1) {
     if (!attacker || !defender) {
         console.error("Invalid attacker or defender provided to calculateDamage");
         return 1; // Return minimal damage on error
+    }
+
+    // Combo system
+    const now = Date.now();
+    if (now - lastAttackTime <= COMBO_WINDOW) {
+        comboCount++;
+        if (comboCount > 1) {
+            movePower *= (1 + (comboCount * 0.1)); // 10% more damage per combo
+            showMoveIndicator(elements.playerAvatar, `Combo x${comboCount}!`, '#ff9800');
+        }
+    } else {
+        comboCount = 1;
+    }
+    lastAttackTime = now;
+
+    // Elemental advantage calculation
+    const attackerElement = attacker.element || ELEMENTS.NEUTRAL;
+    const defenderElement = defender.element || ELEMENTS.NEUTRAL;
+    if (ELEMENT_ADVANTAGES[attackerElement] === defenderElement) {
+        movePower *= 1.5;
+        showMoveIndicator(elements.enemyAvatar, "Super Effective!", '#4caf50');
     }
     // Ensure temporary effects objects exist
      if (!attacker.temporaryEffects) attacker.temporaryEffects = {};
@@ -2191,6 +2273,41 @@ function claimAchievementReward(achievementId) {
 
 
 // Update achievement progress (Revised)
+const MILESTONE_REWARDS = {
+    ENEMIES_DEFEATED: [
+        { count: 10, reward: { gems: 50, attack: 2 } },
+        { count: 50, reward: { gems: 200, attack: 5 } },
+        { count: 100, reward: { gems: 500, attack: 10 } }
+    ],
+    BOSSES_DEFEATED: [
+        { count: 1, reward: { gems: 100, defense: 3 } },
+        { count: 3, reward: { gems: 300, defense: 8 } },
+        { count: 5, reward: { gems: 1000, defense: 15 } }
+    ],
+    GEMS_COLLECTED: [
+        { count: 1000, reward: { maxHealth: 20 } },
+        { count: 5000, reward: { maxHealth: 50 } },
+        { count: 10000, reward: { maxHealth: 100 } }
+    ]
+};
+
+function checkMilestoneRewards(type, value) {
+    const milestones = MILESTONE_REWARDS[type];
+    if (!milestones) return;
+
+    milestones.forEach(milestone => {
+        if (value >= milestone.count && !milestone.claimed) {
+            milestone.claimed = true;
+            // Apply rewards
+            Object.entries(milestone.reward).forEach(([stat, amount]) => {
+                gameState.player[stat] += amount;
+            });
+            addToBattleLog(`Milestone Reward: Reached ${milestone.count} ${type}!`, 'system');
+            showMoveIndicator(elements.playerAvatar, 'Milestone!', '#4caf50');
+        }
+    });
+}
+
 function updateAchievementProgress(achievementId, value) {
     // Find achievement in gameState
     const achievement = gameState.achievements.find(ach => ach.id === achievementId);
