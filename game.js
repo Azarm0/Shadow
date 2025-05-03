@@ -1428,10 +1428,23 @@ function addToBattleLog(message, who = 'system') {
 
 
 function performAttack(attackType) {
-    if (!gameState.battle?.playerTurn || !gameState.enemy || gameState.enemy.health <= 0) {
-        console.log("Cannot attack: Not player's turn, no enemy, or enemy defeated.");
-        return;
-    }
+    try {
+        if (!gameState.battle?.playerTurn || !gameState.enemy || gameState.enemy.health <= 0) {
+            console.log("Cannot attack: Not player's turn, no enemy, or enemy defeated.");
+            return;
+        }
+
+        // Add attack animation class
+        if (elements.playerAvatar) {
+            elements.playerAvatar.classList.add('attack-flash');
+            setTimeout(() => elements.playerAvatar.classList.remove('attack-flash'), 300);
+        }
+
+        // Update UI to show action is happening
+        if (elements.battleInfo) {
+            elements.battleInfo.textContent = "Attacking...";
+            elements.battleInfo.classList.add('attacking');
+        }
     console.log(`Player performs ${attackType} attack.`);
     setBattleButtonsState(false); // Disable buttons during action
     gameState.battle.playerDefending = false; // Reset defense state
