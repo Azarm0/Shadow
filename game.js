@@ -106,12 +106,12 @@ const gameData = {
         { id: 'void_spirit', name: 'Void Spirit', health: 40, attack: 9, defense: 1, speed: 7, xp: 35, gems: 12, image: 'assets/images/enemy3.png', abilities: ['void_strike', 'phase_shift'] }
     ],
     bosses: [
-        { id: 'shadow_lord', name: 'The Shadow Lord', health: 200, attack: 15, defense: 10, speed: 5, xp: 150, gems: 50, image: 'assets/images/boss1.png', abilities: ['shadow_storm', 'void_crush', 'dark_resurrection'], description: 'A powerful entity born from the darkness between worlds. The Shadow Lord commands legions of minions and draws power from fear itself.', unlockLevel: 5 },
-        { id: 'crystal_queen', name: 'The Crystal Queen', health: 300, attack: 20, defense: 15, speed: 6, xp: 250, gems: 100, image: 'assets/images/boss2.png', abilities: ['crystal_storm', 'reflective_barrier', 'shard_explosion'], description: 'Once a benevolent ruler, the Crystal Queen was corrupted by dark magic, turning her heart as cold and sharp as the crystals she controls.', unlockLevel: 10 },
-        { id: 'void_devourer', name: 'The Void Devourer', health: 500, attack: 30, defense: 25, speed: 8, xp: 500, gems: 200, image: 'assets/images/boss3.png', abilities: ['consume_reality', 'dimensional_rift', 'entropy_beam'], description: 'An ancient cosmic horror that exists beyond time and space. It feeds on the fabric of reality itself, leaving nothingness in its wake.', unlockLevel: 15 },
-        { id: 'abyssal_hydra', name: 'The Abyssal Hydra', health: 600, attack: 22, defense: 18, speed: 7, xp: 600, gems: 250, image: 'assets/images/boss4.png', abilities: ['hydras_fury', 'toxic_breath', 'regenerate'], description: 'A multi-headed horror from the depths, each head spews a different elemental attack. It grows more dangerous as you cut it down.', unlockLevel: 20 },
-        { id: 'chronomancer', name: 'The Chronomancer', health: 500, attack: 28, defense: 20, speed: 12, xp: 800, gems: 350, image: 'assets/images/boss5.png', abilities: ['time_reversal', 'haste', 'temporal_blast'], description: 'A master of time, the Chronomancer manipulates the flow of battle, reversing damage and speeding up their own actions.', unlockLevel: 25 },
-        { id: 'iron_colossus', name: 'The Iron Colossus', health: 900, attack: 35, defense: 35, speed: 4, xp: 1200, gems: 500, image: 'assets/images/boss6.png', abilities: ['earthquake', 'iron_defense', 'overload'], description: 'A towering construct of steel and magic, nearly impervious to damage. Its attacks shake the very ground.', unlockLevel: 30 }
+        { id: 'shadow_lord', name: 'The Shadow Lord', health: 300, attack: 25, defense: 15, speed: 7, xp: 200, gems: 80, image: 'assets/images/boss1.png', abilities: ['shadow_storm', 'void_crush', 'dark_resurrection', 'fear_aura'], description: 'A powerful entity born from the darkness between worlds. The Shadow Lord commands legions of minions and draws power from fear itself. Each attack has a chance to inflict terror.', unlockLevel: 5, enrage: { threshold: 0.3, bonus: { attack: 15, speed: 3 } } },
+        { id: 'crystal_queen', name: 'The Crystal Queen', health: 450, attack: 30, defense: 25, speed: 8, xp: 350, gems: 150, image: 'assets/images/boss2.png', abilities: ['crystal_storm', 'reflective_barrier', 'shard_explosion', 'crystal_prison'], description: 'Once a benevolent ruler, the Crystal Queen was corrupted by dark magic. Her crystal shield reflects damage and can trap opponents.', unlockLevel: 10, shield: { capacity: 100, reflection: 0.3 } },
+        { id: 'void_devourer', name: 'The Void Devourer', health: 700, attack: 40, defense: 30, speed: 9, xp: 600, gems: 250, image: 'assets/images/boss3.png', abilities: ['consume_reality', 'dimensional_rift', 'entropy_beam', 'void_absorption'], description: 'An ancient cosmic horror that grows stronger by absorbing damage. Each successful hit increases its power.', unlockLevel: 15, absorption: { rate: 0.2, cap: 50 } },
+        { id: 'abyssal_hydra', name: 'The Abyssal Hydra', health: 800, attack: 35, defense: 28, speed: 8, xp: 800, gems: 300, image: 'assets/images/boss4.png', abilities: ['hydras_fury', 'toxic_breath', 'regenerate', 'head_spawn'], description: 'A multi-headed horror that spawns new heads when damaged. Each head increases attack power and adds new abilities.', unlockLevel: 20, heads: { max: 3, spawnThreshold: 0.25, bonus: { attack: 10, defense: 5 } } },
+        { id: 'chronomancer', name: 'The Chronomancer', health: 600, attack: 45, defense: 25, speed: 14, xp: 1000, gems: 400, image: 'assets/images/boss5.png', abilities: ['time_reversal', 'haste', 'temporal_blast', 'time_loop'], description: 'A master of time who can reverse fatal damage and duplicate powerful attacks. Time manipulation grows stronger in later phases.', unlockLevel: 25, timeWarp: { charges: 2, cooldown: 3 } },
+        { id: 'iron_colossus', name: 'The Iron Colossus', health: 1200, attack: 50, defense: 45, speed: 5, xp: 1500, gems: 600, image: 'assets/images/boss6.png', abilities: ['earthquake', 'iron_defense', 'overload', 'molten_core'], description: 'A towering construct that enters a devastating molten state at low health, dealing massive damage while sacrificing defense.', unlockLevel: 30, moltenState: { threshold: 0.4, attack: 30, defense: -15 } }
     ],
     shopItems: {
         weapons: [
@@ -174,19 +174,22 @@ const ENEMY_MOVES = {
         { name: 'Entropy Zap', type: 'attack', power: 1.0, sfx: 'special.wav', color: '#f44336' }
     ],
     shadow_lord: [
-        { name: 'Shadow Storm', type: 'attack', power: 1.5, sfx: 'boss.wav', color: '#6a0080' },
-        { name: 'Void Crush', type: 'attack', power: 1.2, sfx: 'boss.wav', color: '#23234a' },
-        { name: 'Dark Resurrection', type: 'heal', amount: 40, sfx: 'heal.wav', color: '#4caf50' }
+        { name: 'Shadow Storm', type: 'attack', power: 1.6, sfx: 'boss.wav', color: '#6a0080', multi: 2 },
+        { name: 'Void Crush', type: 'attack', power: 1.4, sfx: 'boss.wav', color: '#23234a', defense_pierce: 0.3 },
+        { name: 'Dark Resurrection', type: 'heal', amount: 60, sfx: 'heal.wav', color: '#4caf50', buff: { attack: 5 } },
+        { name: 'Fear Aura', type: 'debuff', stat: 'attack', amount: -8, duration: 3, sfx: 'boss.wav', color: '#6a0080' }
     ],
     crystal_queen: [
-        { name: 'Crystal Storm', type: 'attack', power: 1.4, sfx: 'boss.wav', color: '#2196f3' },
-        { name: 'Reflective Barrier', type: 'buff', stat: 'defense', amount: 5, sfx: 'buff.wav', color: '#d05ce3' },
-        { name: 'Shard Explosion', type: 'attack', power: 1.3, sfx: 'special.wav', color: '#ff9800' }
+        { name: 'Crystal Storm', type: 'attack', power: 1.5, sfx: 'boss.wav', color: '#2196f3', multi: 3, shield_gain: 20 },
+        { name: 'Reflective Barrier', type: 'buff', stat: 'defense', amount: 8, sfx: 'buff.wav', color: '#d05ce3', reflect: 0.3 },
+        { name: 'Shard Explosion', type: 'attack', power: 1.4, sfx: 'special.wav', color: '#ff9800', shield_consume: true },
+        { name: 'Crystal Prison', type: 'debuff', stat: 'stun', amount: 2, sfx: 'boss.wav', color: '#2196f3', condition: 'shield_active' }
     ],
     void_devourer: [
-        { name: 'Consume Reality', type: 'attack', power: 1.7, sfx: 'boss.wav', color: '#9c27b0' },
-        { name: 'Dimensional Rift', type: 'attack', power: 1.3, sfx: 'special.wav', color: '#00bcd4' },
-        { name: 'Entropy Beam', type: 'attack', power: 1.5, sfx: 'special.wav', color: '#f44336' }
+        { name: 'Consume Reality', type: 'attack', power: 1.8, sfx: 'boss.wav', color: '#9c27b0', life_steal: 0.3 },
+        { name: 'Dimensional Rift', type: 'attack', power: 1.5, sfx: 'special.wav', color: '#00bcd4', ignore_defense: true },
+        { name: 'Entropy Beam', type: 'attack', power: 1.6, sfx: 'special.wav', color: '#f44336', scaling: 'absorbed_power' },
+        { name: 'Void Absorption', type: 'buff', stat: 'absorbed_power', amount: 10, sfx: 'boss.wav', color: '#9c27b0' }
     ],
     abyssal_hydra: [
         { name: "Hydra's Fury", type: 'attack', power: 1.2, multi: 3, sfx: 'hydra_roar.wav', color: '#43e97b' }, // Multi-hit example
