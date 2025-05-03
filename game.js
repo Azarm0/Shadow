@@ -131,7 +131,7 @@ const gameData = {
             { id: 'shadow_step', name: 'Shadow Step', description: 'Teleport through shadows to strike your enemy. Powerful single target.', price: 100, effect: { ability: 'shadow_step' }, image: 'assets/images/skill1.png', unlockLevel: 2 },
             { id: 'void_shield', name: 'Void Shield', description: 'Create a shield of void energy. Greatly increases defense next turn.', price: 100, effect: { ability: 'void_shield' }, image: 'assets/images/skill2.png', unlockLevel: 2 },
             { id: 'crystal_burst', name: 'Crystal Burst', description: 'Shatter crystals in all directions. Moderate damage, lowers enemy defense.', price: 200, effect: { ability: 'crystal_burst' }, image: 'assets/images/skill3.png', unlockLevel: 5 },
-            { id: 'hydra_frenzy', name: 'Hydra Frenzy', description: 'Unleash a flurry of attacks. Hits 3 times for low damage.', price: 350, effect: { ability: 'hydra_frenzy' }, image: 'assets/images/skill4.png', unlockLevel: 8 },
+            { id: 'hydra_frenzy', name: 'Hydra Frenzy', description: 'Unleash a flurry of weaker attacks. Hits 3 times for very low damage.', price: 300, effect: { ability: 'hydra_frenzy' }, image: 'assets/images/skill4.png', unlockLevel: 8 },
             { id: 'lunar_blessing', name: 'Lunar Blessing', description: 'Heals you for 30% of your max HP.', price: 400, effect: { ability: 'lunar_blessing' }, image: 'assets/images/skill5.png', unlockLevel: 10 },
             { id: 'time_warp', name: 'Time Warp', description: 'Take an extra turn after this one.', price: 600, effect: { ability: 'time_warp' }, image: 'assets/images/skill6.png', unlockLevel: 13 }
         ],
@@ -874,9 +874,9 @@ function purchaseItem(item, category) {
                   if (item.id === 'hydra_frenzy') {
                     let total = 0;
                     for (let i = 0; i < 3; i++) {
-                        total += Math.floor(calculateDamage(player, enemy, 0.6));
+                        total += Math.floor(calculateDamage(player, enemy, 0.4)); // Reduced from 0.6 to 0.4
                     }
-                    addToBattleLog('Hydra Frenzy hits 3 times!', 'player');
+                    addToBattleLog('Hydra Frenzy strikes 3 times with reduced power!', 'player');
                     return total;
                 }
                 if (item.id === 'lunar_blessing') {
