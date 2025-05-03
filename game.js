@@ -2333,9 +2333,37 @@ function updateSfxVolume(event) {
 
 function toggleDarkMode(event) {
     const enabled = event ? event.target.checked : gameState.settings.darkMode;
-    gameState.settings.darkMode = Boolean(enabled); // Ensure boolean
-    applyDarkMode();
+    gameState.settings.darkMode = Boolean(enabled);
+    if (enabled) {
+        document.body.classList.add('dark-mode');
+    } else {
+        document.body.classList.remove('dark-mode');
+    }
+    // Save the preference
     saveGame();
+    
+    // Play toggle sound
+    playSfx('special.wav');
+}
+
+// Add critical hit chance
+function calculateDamage(attacker, defender, movePower = 1) {
+    let damage = /* existing damage calculation */;
+    
+    // 10% chance for critical hit
+    if (Math.random() < 0.1) {
+        damage *= 1.5;
+        // Visual effect for crit
+        const targetElem = defender === gameState.player ? elements.playerAvatar : elements.enemyAvatar;
+        if (targetElem) {
+            targetElem.style.animation = 'criticalHit 0.3s ease';
+            setTimeout(() => targetElem.style.animation = '', 300);
+            addToBattleLog('Critical Hit!', 'system');
+            playSfx('special.wav');
+        }
+    }
+    
+    return Math.floor(damage);
 }
 
 function applySettings() {
