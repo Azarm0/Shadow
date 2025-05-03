@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shadow Realm - An Epic Adventure</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Audiowide&family=Exo+2:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="game-container fullscreen">
+        <header>
+            <div class="logo">Shadow Realm</div>
+            <div class="stats">
+                <div class="currency">
+                    <i class="fas fa-gem"></i> <span id="gems">0</span>
+                </div>
+                <div class="level">
+                    Level: <span id="level">1</span>
+                </div>
+                <div class="xp-bar">
+                    <div id="xp-fill"></div>
+                </div>
+            </div>
+        </header>
+
+        <div class="main-content">
+            <div class="left-panel">
+                <div class="player-info">
+                    <div class="player-avatar" id="player-avatar"></div>
+                    <div class="health-bar">
+                        <div id="health-fill"></div>
+                        <span id="player-hp-percent" class="hp-percent"></span>
+                    </div>
+                    <div class="player-stats">
+                        <p>Attack: <span id="attack">10</span></p>
+                        <p>Defense: <span id="defense">5</span></p>
+                        <p>Speed: <span id="speed">3</span></p>
+                    </div>
+                </div>
+                <div class="menu">
+                    <button id="btn-battle" class="menu-button active"><i class="fas fa-swords"></i> Battle</button>
+                    <button id="btn-shop" class="menu-button"><i class="fas fa-store"></i> Shop</button>
+                    <button id="btn-achievements" class="menu-button"><i class="fas fa-trophy"></i> Achievements</button>
+                    <button id="btn-settings" class="menu-button"><i class="fas fa-cog"></i> Settings</button>
+                </div>
+            </div>
+
+            <div class="right-panel">
+                <div id="battle-screen" class="screen active">
+                    <div class="battle-arena">
+                        <div id="battle-particles" class="battle-particles"></div>
+                        <div class="enemy-container">
+                            <div id="enemy-avatar" class="enemy-avatar"></div>
+                            <div class="enemy-hpbar-wrap">
+                                <div class="enemy-hpbar-bg">
+                                    <div id="enemy-hpbar-fill" class="enemy-hpbar-fill"></div>
+                                </div>
+                                <div id="enemy-hpbar-percent" class="enemy-hpbar-percent">100%</div>
+                            </div>
+                            <div id="enemy-name">Shadow Minion</div>
+                        </div>
+                        <div id="skill-bar" class="skill-bar"></div>
+                        <div id="battle-info" class="battle-info">Your Turn</div>
+                        <div id="pokemon-turn-box" class="pokemon-turn-box"></div>
+                        <div class="battle-actions">
+                            <button id="attack-btn" class="action-button big"><i class="fas fa-sword"></i> Attack</button>
+                            <button id="special-btn" class="action-button special big">
+                                <i class="fas fa-bolt"></i> Special
+                                <span class="tooltip">Select a skill to use on the enemy.</span>
+                            </button>
+                            <button id="defend-btn" class="action-button big"><i class="fas fa-shield"></i> Defend</button>
+                        </div>
+                        <div id="turn-order-bar" class="turn-order-bar"></div>
+                    </div>
+                </div>
+
+                <div id="shop-screen" class="screen">
+                    <h2>Shop</h2>
+                    <div class="shop-categories">
+                        <button class="shop-category active" data-category="weapons">Weapons</button>
+                        <button class="shop-category" data-category="armor">Armor</button>
+                        <button class="shop-category" data-category="skills">Skills</button>
+                        <button class="shop-category" data-category="potions">Potions</button>
+                    </div>
+                    <div class="shop-items" id="shop-items"></div>
+                </div>
+
+                <div id="achievements-screen" class="screen">
+                    <h2>Achievements</h2>
+                    <div class="achievements-list" id="achievements-list"></div>
+                </div>
+
+                <div id="settings-screen" class="screen">
+                    <h2>Settings</h2>
+                    <div class="settings-options">
+                        <div class="setting">
+                            <label for="music-volume">Music Volume</label>
+                            <input type="range" id="music-volume" min="0" max="100" value="70">
+                        </div>
+                        <div class="setting">
+                            <label for="sfx-volume">SFX Volume</label>
+                            <input type="range" id="sfx-volume" min="0" max="100" value="80">
+                        </div>
+                        <div class="setting">
+                            <label for="dark-mode">Dark Mode</label>
+                            <input type="checkbox" id="dark-mode" checked>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <div id="reward-modal" class="modal">
+        <div class="modal-content">
+            <h2>You've earned a reward!</h2>
+            <div id="reward-details"></div>
+            <button id="claim-reward">Claim</button>
+        </div>
+    </div>
+
+    <div id="level-up-modal" class="modal">
+        <div class="modal-content">
+            <h2>Level Up!</h2>
+            <div class="level-up-animation"></div>
+            <p>You've reached level <span id="new-level"></span>!</p>
+            <div id="level-up-rewards"></div>
+            <button id="continue-btn">Continue</button>
+        </div>
+    </div>
+
+    <div id="boss-intro-modal" class="modal">
+        <div class="modal-content wide">
+            <h2 id="boss-name">Boss Name</h2>
+            <div id="boss-avatar" class="boss-avatar"></div>
+            <p id="boss-description">Boss description goes here</p>
+            <button id="fight-boss-btn">Fight!</button>
+            <button id="decline-boss-btn" style="margin-left:1.5rem;">Decline</button>
+        </div>
+    </div>
+
+    <div id="boss-victory-modal" class="modal">
+        <div class="modal-content wide">
+            <h2 class="victory-title">Victory!</h2>
+            <div id="boss-victory-avatar" class="boss-avatar"></div>
+            <div id="boss-victory-reward"></div>
+            <button id="continue-after-boss">Continue</button>
+        </div>
+    </div>
+
+    <audio id="background-music" loop>
+        <source src="assets/audio/background.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="battle-music" loop>
+        <source src="assets/audio/battle.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="boss-music" loop>
+        <source src="assets/audio/boss.mp3" type="audio/mpeg">
+    </audio>
+
+    <script src="game.js"></script>
+</body>
+</html> 
